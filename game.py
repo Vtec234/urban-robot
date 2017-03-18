@@ -35,7 +35,7 @@ class Game:
         for elem in list:
             if (elem[0] >= minPair[0]) and (elem[0] <= maxPair[0]):
                 if (elem[1] >= minPair[1]) and (elem[1] <= maxPair[1]):
-                    pass
+                    newlist.append(elem)
 
 
     def draw(self):
