@@ -15,6 +15,7 @@ class Game:
     def __init__(self):
         self._WIDTH = 175
         self._HEIGHT = 175
+        self._GRIDSIZE = 35
         self._POTIONS_LIMIT = 3
         self._MONSTERS_LIMIT = 10
         self._playerPos = (self._WIDTH/2, self._HEIGHT/2)
@@ -130,14 +131,14 @@ class Game:
 
 
     def draw(self):
-        size = width, height = 400, 400
+        size = width, height = 700, 700
         white = (255, 255, 255)
         screen = pygame.display.set_mode(size)
         pygame.display.update()
-        for i in range(0,10):
-            for j in range(0, 10):
-                pygame.draw.rect(screen, white, [i*40+2, j*40+2, 36, 36])
-                pygame.display.update()
+        for i in range(0, self._GRIDSIZE):
+            for j in range(0, self._GRIDSIZE):
+                pygame.draw.rect(screen, white, [i*20+1, j*20+1, 18, 18])
+        pygame.display.update()
         #render graphics to screen
 
     # Runs every actual frame (e.g. 1MIL times/sec)
