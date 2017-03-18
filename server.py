@@ -1,15 +1,20 @@
 from flask import Flask
 from flask import request
 from flask import jsonify
+
+from game import Game
+
+game = Game()
+
 app = Flask(__name__)
 
 @app.route("/world", methods = ["GET"])
 def handleGetWorld():
-    return jsonify( { "player": (2, 4), "monsters": [(2, 4), (3, 7), (1, 0)], "healths": [()] } )
+    return jsonify( { "player": game.get_player_pos(), "monsters": game.get_monsters(), "potions": game.get_potions() } )
 
 @app.route("/goals", methods = ["GET"])
 def handleGetGoals():
-    return jsonify( { "playerGoal": (2, 5), "audienceGoal": (45, 3) } )
+    return jsonify( { "playerGoal": game., "audienceGoal": (45, 3) } )
 
 @app.route("/spawnMonster", methods = ["POST"])
 def handleSpawnMonster():

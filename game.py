@@ -26,6 +26,21 @@ class Game:
         self._pgoal = (0, 0)
         self._agoal = (0, 0)
 
+    def get_player_pos(self):
+        return self._playerPos
+
+    def get_monsters(self):
+        return self._monsters
+
+    def get_potions(self):
+        return self._potions
+
+    def get_player_goal(self):
+        return self._pgoal
+
+    def get_audience_goal(self):
+        return self._agoal
+
 #firstly goals, then hps, then with time being audience introduce hps and monsters
 
         #new monster, given coordinates  
