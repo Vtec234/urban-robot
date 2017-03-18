@@ -13,13 +13,17 @@ class Game:
     def __init__(self):
         self._WIDTH = 256
         self._HEIGHT = 256
-        self._PLAYERWIDTH = self._WIDTH/2
-        self._PLAYERHEIGHT = self._HEIGHT/2
+        self._PLAYERX = self._WIDTH/2
+        self._PLAYERY = self._HEIGHT/2
+        self._MONSTERS = []
+
         # Player starts at middle
         self._map[WIDTH/2][HEIGHT/2] = 1
 
     def update(self):
         pass
+        for i in range(:
+            self._MONSTERS.
         for event in pygame.event.get() :
             if event.type == pygame.KEYDOWN :
                 if event.key == pygame.K_UP :
@@ -30,8 +34,16 @@ class Game:
                     move = "left"
                 elif event.key == pygame.K_RIGHT :
                     move = "right"
-        
-        
+        if move == "up" && self._PLAYERY>0
+            self._PLAYERY = self._PLAYERY - 1
+        elif move == "down" && self._PLAYERY<self._HEIGHT
+            self._PLAYERY = self._PLAYERY + 1
+        elif move == "left" && self._PLAYERX>0
+            self._PLAYERX = self._PLAYERX - 1
+        elif move == "right" && self._PLAYERX<self._WIDTH
+            self._PLAYERX = self._PLAYERX - 1
+
+
         # drawing
 
     def draw(self):
