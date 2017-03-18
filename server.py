@@ -20,7 +20,7 @@ def handleSpawnMonster():
         return "OK"
 
 @app.route("/spawnHealth", methods = ["POST"])
-def handleSpawnHealth():
+def handleSpawnHeal():
     if request.method == "POST":
         print(request.form)
         return "OK"

@@ -15,18 +15,16 @@ class Game:
     def __init__(self):
         self._WIDTH = 175
         self._HEIGHT = 175
-        self._PLAYERX = self._WIDTH/2
-        self._PLAYERY = self._HEIGHT/2
-        self._MOVE = ""
-        self._MONSTERS = []
-        self._HP = []
         self._POTIONS_LIMIT = 3
         self._MONSTERS_LIMIT = 10
+        self._playerPos = (self._WIDTH/2, self._HEIGHT/2)
+        self._move = ""
+        self._monsters = []
+        self._potions = []
+        self._health = 5
         self._mindist = 4
-        self._PGX=0
-        self._PGY=0
-        self._AGX=0
-        self._AGY=0
+        self._pgoal = (0, 0)
+        self._agoal = (0, 0)
 
 #firstly goals, then hps, then with time being audience introduce hps and monsters
 
@@ -92,82 +90,24 @@ class Game:
             a = distance(a,b,x,y)
             if distance(a,b,x,y) < _mindist
                 return False
-        
+
         _HP.append((x,y))
         return True
 
-    #new player goal
-    def new_pg (self, x, y)
-        #if too close to player
-        if distance(x,y,PLAYERX,PLAYERY) < _mindist
-            return False
-
-        #if too close to goals
-        if distance(x,y,_PGX,_PGY) < _mindist/2
-            return False
-
-        if distance(x,y,_AGX,_AGY) < _mindist/2
-            return False
-
-        #if too close to HPs    
-        for h in _HP :
-            h1 = _HP[h[0]]
-            h2 = _HP[h[1]]
-            a = distance(h1,h2,x,y)
-            if distance(a,b,x,y) < _mindist/2
-                return False
-
-        #if too close to monsters
-        for i in _MONSTERS:
-            a = _MONSTERS[i[0]]
-            b = _MONSTERS[i[1]]
-            a = distance(a,b,x,y)
-            if distance(a,b,x,y) < _mindist
-                return False
-        
-        _PGX = x
-        _PGY = y
-        return True
-
-
-        #new audience goal
-    def new_ag (self, x, y)
-        #if too close to player
-        if distance(x,y,PLAYERX,PLAYERY) < _mindist
-            return False
-
-        #if too close to goals
-        if distance(x,y,_PGX,_PGY) < _mindist/2
-            return False
-
-        if distance(x,y,_AGX,_AGY) < _mindist/2
-            return False
-
-        #if too close to HPs    
-        for h in _HP :
-            h1 = _HP[h[0]]
-            h2 = _HP[h[1]]
-            a = distance(h1,h2,x,y)
-            if distance(a,b,x,y) < _mindist/2
-                return False
-
-        #if too close to monsters
-        for i in _MONSTERS:
-            a = _MONSTERS[i[0]]
-            b = _MONSTERS[i[1]]
-            a = distance(a,b,x,y)
-            if distance(a,b,x,y) < _mindist
-                return False
-        
-        _AGX = x
-        _AGY = y
-        return True
-
-
     #distance between two points
-    def distance(x1,y1,x2,y2):  
-     dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)  
-     return dist
+    def distance(a, b):
+        dist = math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
+        return dist
+
+    def add_goals(self):
+        # TODO random
+        self._pgoal = (20, 20)
+        while distance(self._pgoal, self._playerPos) > (10 * self._MINDIST):
+            self._pgoal = (20, 20)
+
+        self._agoal = (20, 20)
+        while distance(self._agoal, self._playerPos) > (10 * self._MINDIST) or distance(self._agoal, self._pgoal) > (5 * self._MINDIST):
+            self._agoal = (20, 20)
 
     # Runs every game tick (e.g. 1 second)
     def tick(self):
