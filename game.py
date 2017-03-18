@@ -13,13 +13,25 @@ class Game:
     def __init__(self):
         self._WIDTH = 256
         self._HEIGHT = 256
-        self._map = [[0] * HEIGHT] * WIDTH
+        self._PLAYERWIDTH = self._WIDTH/2
+        self._PLAYERHEIGHT = self._HEIGHT/2
         # Player starts at middle
         self._map[WIDTH/2][HEIGHT/2] = 1
 
     def update(self):
         pass
-        # logic
+        for event in pygame.event.get() :
+            if event.type == pygame.KEYDOWN :
+                if event.key == pygame.K_UP :
+                    move = "up"
+                elif event.key == pygame.K_DOWN :
+                    move = "down"
+                elif event.key == pygame.K_LEFT :
+                    move = "left"
+                elif event.key == pygame.K_RIGHT :
+                    move = "right"
+        
+        
         # drawing
 
     def draw(self):
