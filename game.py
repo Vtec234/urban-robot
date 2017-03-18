@@ -27,21 +27,6 @@ class Game:
         self._pgoal = (0, 0)
         self._agoal = (0, 0)
 
-    def get_player_pos(self):
-        return self._playerPos
-
-    def get_monsters(self):
-        return self._monsters
-
-    def get_potions(self):
-        return self._potions
-
-    def get_player_goal(self):
-        return self._pgoal
-
-    def get_audience_goal(self):
-        return self._agoal
-
 #firstly goals, then hps, then with time being audience introduce hps and monsters
 
         #new monster, given coordinates  
@@ -136,6 +121,12 @@ class Game:
         elif self._MOVE == "right" and self._PLAYERX<self._WIDTH:
             self._PLAYERX = self._PLAYERX - 1
 
+    def convertToLocal(globalCoordinates)
+        return (globalCoordinates[0]%35, globalCoordinates[1]%35, globalCoordinates[0]/35, globalCoordinates[1]/35)
+
+    def convertToGlobal(localCoordinates)
+        return (localCoordinates[2]*35+localCoordinates[0], localCoordinates[3]*35+localCoordinates[1])
+
     def filter(list, maxPair, minPair):
         newlist = []
         for elem in list:
@@ -148,6 +139,7 @@ class Game:
     def draw(self):
         size = width, height = 700, 700
         white = (255, 255, 255)
+        red = (255, 0, 0)
         screen = pygame.display.set_mode(size)
         pygame.display.update()
         for i in range(0, self._GRIDSIZE):
