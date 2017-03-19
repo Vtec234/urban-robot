@@ -51,7 +51,7 @@ class Game:
 
     # Returns elements of list that fit between minPair and maxPair on both X-axis and Y-axis
     @staticmethod
-    def filter(lst, maxPair, minPair):
+    def filter(lst, minPair, maxPair):
         newlist = []
         for elem in lst:
             if (elem[0] >= minPair[0]) and (elem[0] <= maxPair[0]):
@@ -59,11 +59,9 @@ class Game:
                     newlist.append(elem)
         return newlist
 
-    @staticmethod
     def convertToLocal(self, globalCoordinates):
         return (globalCoordinates[0]%self._ROOM_SIZE, globalCoordinates[1]%self._ROOM_SIZE, globalCoordinates[0]/self._ROOM_SIZE, globalCoordinates[1]/self._ROOM_SIZE)
 
-    @staticmethod
     def convertToGlobal(self, localCoordinates):
         return (localCoordinates[2]*self._ROOM_SIZE+localCoordinates[0], localCoordinates[3]*self._ROOM_SIZE+localCoordinates[1])
 
@@ -137,11 +135,25 @@ class Game:
         size = width, height = 700, 700
         white = (255, 255, 255)
         red = (255, 0, 0)
+        black = (0,0,0)
+        green = (0, 255, 0)
+        blue = (0, 0, 255)
         screen = pygame.display.set_mode(size)
         for i in range(0, self._ROOM_SIZE):
             for j in range(0, self._ROOM_SIZE):
-                pygame.draw.rect(screen, white, [i*20+1, j*20+1, 18, 18])
-
+                if i==0 or i==self._ROOM_SIZE-1 or j==0 or j==self._ROOM_SIZE-1 :
+                    if i==self._ROOM_SIZE/2 or j==self._ROOM_SIZE/2 :
+                        pygame.draw.rect(screen, black, [i*20+1, j*20+1, 18, 18])
+                    else:
+                        pygame.draw.rect(screen, green, [i*20+1, j*20+1, 18, 18])
+                else:
+                    pygame.draw.rect(screen, white, [i*20+1, j*20+1, 18, 18])
+        player = self.convertToLocal(self._playerPos)
+        pygame.draw.circle(screen, blue, [(player[0]*size[0]/self._ROOM_SIZE)+(size[0]/self._ROOM_SIZE/2), (player[1]*size[1]/self._ROOM_SIZE)+(size[1]/self._ROOM_SIZE/2)], 4)
+        for monster in self.filter(self._monsters, (player[2]*self._ROOM_SIZE, player[3]*self._ROOM_SIZE), (player[2]*self._ROOM_SIZE+self._ROOM_SIZE-1, player[3]*self._ROOM_SIZE+self._ROOM_SIZE-1)):
+            monsterLocal = self.convertToLocal(monster)
+            pygame.draw.circle(screen, red, [(monsterLocal[0]*size[0]/self._ROOM_SIZE)+(size[0]/self._ROOM_SIZE/2), (monsterLocal[1]*size[1]/self._ROOM_SIZE)+(size[1]/self._ROOM_SIZE/2)], 4)
+        
         pygame.display.update()
 
     # Runs every actual frame (e.g. 1MIL times/sec)
