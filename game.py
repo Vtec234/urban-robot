@@ -22,7 +22,7 @@ class Game:
         self._ROOM_SIZE = 23
         self._playerPos = (self._WIDTH/2, self._HEIGHT/2)
         self._move = ""
-        self._monsters = []
+        self._monsters = [(60,60),(50,50),(70,70),(55,55),(25,25),(100,100)]
         self._potions = []
         self._health = 5
         self._mindist = 7
@@ -62,6 +62,8 @@ class Game:
                 if (elem[1] >= minPair[1]) and (elem[1] <= maxPair[1]):
                     newlist.append(elem)
         return newlist
+
+        
 
     def rand_cord(self):
         x = random.randint(0, self._WIDTH)
@@ -330,6 +332,9 @@ class Game:
             for j in range(i,len(self._monsters)-1):
                 if newMonsters[i]==newMonsters[j]:
                     newMonsters[j]=self._monsters[j]
+
+        self._monsters = newMonsters
+
 
     # Runs every game tick (e.g. 1 second)
     #f.e. if we are in the very top, up arrow does not make sense
