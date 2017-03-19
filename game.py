@@ -14,12 +14,12 @@ import time
 # 5 - audienceGoal
 class Game:
     def __init__(self):
-        self._WIDTH = 175
-        self._HEIGHT = 175
+        self._WIDTH = 125
+        self._HEIGHT = 125
         self._POTIONS_LIMIT = 3
         self._MONSTERS_LIMIT = 10
         self._TICK_MS = 1000
-        self._ROOM_SIZE = 35
+        self._ROOM_SIZE = 23
         self._playerPos = (self._WIDTH/2, self._HEIGHT/2)
         self._move = ""
         self._monsters = []
@@ -122,17 +122,18 @@ class Game:
 
     # Runs every game tick (e.g. 1 second)
     def tick(self):
-        if self._move == "up" and self._playerPos[1] > 0:
-            self._playerPos = (self._playerPos[0], self._playerPos[1] - 1)
-        elif self._move == "down" and self._playerPos[1] < self._HEIGHT:
+        localPlayerPos = self.convertToLocal(self._playerPos)
+        if self._move == "up" and self._playerPos[1] > 1:
+            self._playerPos = (self._playerPos[0], self._playerPos[1] - 1) 
+        elif self._move == "down" and self._playerPos[1] < self._HEIGHT-1:
             self._playerPos = (self._playerPos[0], self._playerPos[1] + 1)
-        elif self._move == "left" and self._playerPos[0] > 0:
+        elif self._move == "left" and self._playerPos[0] > 1:
             self._playerPos = (self._playerPos[0] - 1, self._playerPos[1])
-        elif self._move == "right" and self._playerPos[0] < self._WIDTH:
+        elif self._move == "right" and self._playerPos[0] < self._WIDTH-1:
             self._playerPos = (self._playerPos[0] + 1, self._playerPos[1])
 
     def draw(self):
-        size = width, height = 700, 700
+        size = width, height = 500, 500
         white = (255, 255, 255)
         red = (255, 0, 0)
         black = (0,0,0)
@@ -143,11 +144,11 @@ class Game:
             for j in range(0, self._ROOM_SIZE):
                 if i==0 or i==self._ROOM_SIZE-1 or j==0 or j==self._ROOM_SIZE-1 :
                     if i==self._ROOM_SIZE/2 or j==self._ROOM_SIZE/2 :
-                        pygame.draw.rect(screen, black, [i*20+1, j*20+1, 18, 18])
+                        pygame.draw.rect(screen, black, [i*size[0]/self._ROOM_SIZE+1, j*size[1]/self._ROOM_SIZE+1, 18, 18])
                     else:
-                        pygame.draw.rect(screen, green, [i*20+1, j*20+1, 18, 18])
+                        pygame.draw.rect(screen, green, [i*size[0]/self._ROOM_SIZE+1, j*size[1]/self._ROOM_SIZE+1, 18, 18])
                 else:
-                    pygame.draw.rect(screen, white, [i*20+1, j*20+1, 18, 18])
+                    pygame.draw.rect(screen, white, [i*size[0]/self._ROOM_SIZE+1, j*size[1]/self._ROOM_SIZE+1, 18, 18])
         player = self.convertToLocal(self._playerPos)
         pygame.draw.circle(screen, blue, [(player[0]*size[0]/self._ROOM_SIZE)+(size[0]/self._ROOM_SIZE/2), (player[1]*size[1]/self._ROOM_SIZE)+(size[1]/self._ROOM_SIZE/2)], 4)
         for monster in self.filter(self._monsters, (player[2]*self._ROOM_SIZE, player[3]*self._ROOM_SIZE), (player[2]*self._ROOM_SIZE+self._ROOM_SIZE-1, player[3]*self._ROOM_SIZE+self._ROOM_SIZE-1)):
