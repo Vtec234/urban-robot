@@ -123,13 +123,13 @@ class Game:
     # Runs every game tick (e.g. 1 second)
     def tick(self):
         if self._move == "up" and self._playerPos[1] > 0:
-            self._playerPos[1] == self._playerPos[1] - 1
+            self._playerPos = (self._playerPos[0], self._playerPos[1] - 1)
         elif self._move == "down" and self._playerPos[1] < self._HEIGHT:
-            self._playerPos[1] == self._playerPos[1] + 1
+            self._playerPos = (self._playerPos[0], self._playerPos[1] + 1)
         elif self._move == "left" and self._playerPos[0] > 0:
-            self._playerPos[0] == self._playerPos[0] - 1
+            self._playerPos = (self._playerPos[0] - 1, self._playerPos[1])
         elif self._move == "right" and self._playerPos[0] < self._WIDTH:
-            self._playerPos[0] == self._playerPos[0] + 1
+            self._playerPos = (self._playerPos[0] + 1, self._playerPos[1])
 
     def draw(self):
         size = width, height = 700, 700
@@ -183,7 +183,7 @@ class Game:
 def main():
     pygame.init()
     game = Game()
-    game.draw()
+    #game.draw()
     while game.update():
         pass
 
