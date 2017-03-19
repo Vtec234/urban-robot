@@ -312,13 +312,15 @@ class Game:
         return direction
 
 
-    def follow(self):
-        newMonsters = []
-        for mon in self._monsters:
+    def follow(self,oldMonsters):
+        newMonsters=[]
+        for mon in oldMonsters:
             t = self.check(mon)
             if t[0]=="die":
                 self._health = self._health - 1
-                self._monsters.remove(mon)
+                if self._health<=0:
+                    print "LOOSER" #TEXTBOX
+                oldMonsters.remove(mon)
             else:
                 if len(t) == 1:
                     newMonsters.append(self.movemon(mon,t[0]))
@@ -328,13 +330,40 @@ class Game:
                         newMonsters.append(self.movemon(mon,t[0]))
                     else:
                         newMonsters.append(self.movemon(mon,t[1]))
-        for i in range(0,len(self._monsters)-1):
-            for j in range(i,len(self._monsters)-1):
+        for i in range(0,len(oldMonsters)-1):
+            for j in range(i,len(oldMonsters)-1):
                 if newMonsters[i]==newMonsters[j]:
-                    newMonsters[j]=self._monsters[j]
+                    newMonsters[j]=oldMonsters[j]
 
-        self._monsters = newMonsters
+        return newMonsters
 
+    def followtarget(self,a,b):#from A to B order
+        direction = []
+        if (a[0] > b[0]):
+            direction.append("left")
+        if (a[1] > b[1]):
+            direction.append("up")
+        if (a[0] < b[0]):
+            direction.append("right")
+        if (a[1] < b[1]):
+            direction.append("down")
+        if (direction==[]):
+            direction.append("end")
+        return direction
+
+
+    def path(self):
+        monsToFollow=[]
+        for mons in self._monsters:
+            if isRoom(mons,_playerPos):
+                monsToFollow.append(mons)
+            else:
+                door = which_door(mons,self._playerPos)
+                while (distance(mons,door)>0)
+                    door = which_door(mons,self._playerPos)
+                    self.movemon(mons,followtarget(mons,door))
+        path()
+                
 
     # Runs every game tick (e.g. 1 second)
     #f.e. if we are in the very top, up arrow does not make sense
