@@ -268,6 +268,69 @@ class Game:
                 else:
                     return door2
 
+
+    #input: (,) of monster and (,) of player. 
+    #if same room -> follow
+    #if other rooms -> which door -> follow which door -> foo triangle
+    #finally go the same room
+    #before each move check validity
+    #validity - not wall + 2 monsters not in 1 place
+
+    def movemon(self,m,str):
+        if (str=="left"):
+            m = (m[0]-1,m[1])
+
+        if (str=="right"): 
+            m = (m[0]+1,m[1])
+        
+        if (str=="up"):
+            m = (m[0],m[1]-1)
+
+        if (str=="down"): 
+            m = (m[0],m[1]+1)
+
+        return m
+
+    def check(self,a):
+        direction = []
+        if (a[0] > self._playerPos[0]):
+            direction.append("left")
+        if (a[1] > self._playerPos[1]):
+            direction.append("up")
+        if (a[0] < self._playerPos[0]):
+            direction.append("right")
+        if (a[1] < self._playerPos[1]):
+            direction.append("down")
+        if (direction==[]):
+            direction.append("die")
+        return direction
+
+
+    def follow(self):
+        newMonsters = []
+        for mon in self._monsters:
+            t = check(mon)
+            if t[0]=="die":
+                self._health = self._health - 1
+                self._monsters.remove(mon)
+            else:
+                if len(t) == 1:
+                    newMonsters.append(movemon(mon,el))
+                else: 
+                    num = self.rand_cord()
+                    if num[0]>=num[1]:
+                        newMonsters.append(movemon(mon,t[0]))
+                    else:
+                        newMonsters.append(movemon(mon,t[1]))
+        for i in range(0,len(self._monsters)-1):
+            for j in range(i,len(self._monsters)-1):
+                if newMonsters[i]==newMonsters[j]:
+                    newMonster[j]=self._monsters[j]
+
+                        
+
+
+
     # Runs every game tick (e.g. 1 second)
     #f.e. if we are in the very top, up arrow does not make sense
     def tick(self):
@@ -282,7 +345,7 @@ class Game:
             else:
                 self._playerPos = (self._playerPos[0], self._playerPos[1] - 1) 
 
-        elif self._move == "down" and self._playerPos[1] < self._HEIGHT:
+        elif self._move == "down" and self._playerPos[1] < self._HEIGHT - 2:
             (i,j)=(self._playerPos[0], self._playerPos[1] + 1 )
             if i%(self._ROOM_SIZE+1) ==0 or j%(self._ROOM_SIZE+1)==0: #if wall
                 if i%(self._ROOM_SIZE+1)==(math.floor(self._ROOM_SIZE/2)+1) and j%(self._ROOM_SIZE+1)==0: #if doors
@@ -293,24 +356,24 @@ class Game:
                 self._playerPos = (self._playerPos[0], self._playerPos[1] + 1) 
 
         elif self._move == "left" and self._playerPos[0] > 1:
-            (i, j) =(self._playerPos[0]-1, self._playerPos[1])
-            if i%(self._ROOM_SIZE+1)==0 or j%(self._ROOM_SIZE+1)==0:
-                if i%(self._ROOM_SIZE+1)==(self._ROOM_SIZE/2+1) and j%(self._ROOM_SIZE+1)==0:
-                    self._playerPos = (self._playerPos[0]-1, self._playerPos[1])
-                elif j%(self._ROOM_SIZE+1)==(self._ROOM_SIZE/2+1) and i%(self._ROOM_SIZE+1):
-                    self._playerPos = (self._playerPos[0]-1, self._playerPos[1])
+            (i,j)=(self._playerPos[0]-1, self._playerPos[1])
+            if i%(self._ROOM_SIZE+1) ==0 or j%(self._ROOM_SIZE+1)==0: #if wall
+                if i%(self._ROOM_SIZE+1)==(math.floor(self._ROOM_SIZE/2))+1 and j%(self._ROOM_SIZE+1)==0: #if doors
+                    self._playerPos = ((self._playerPos[0]-1), self._playerPos[1])
+                elif j%(self._ROOM_SIZE+1)==(math.floor(self._ROOM_SIZE/2))+1 and i%(self._ROOM_SIZE+1)==0: #if doors
+                    self._playerPos = ((self._playerPos[0]-1), self._playerPos[1])
             else:
-                self._playerPos = (self._playerPos[0] - 1, self._playerPos[1])
+                self._playerPos = ((self._playerPos[0]-1), self._playerPos[1]) 
 
-        elif self._move == "right" and self._playerPos[0] < self._WIDTH:
-            (i, j) =(self._playerPos[0]+1, self._playerPos[1])
-            if i%(self._ROOM_SIZE+1)==0 or j%(self._ROOM_SIZE+1)==0:
-                if i%(self._ROOM_SIZE+1)==(self._ROOM_SIZE/2+1) and j%(self._ROOM_SIZE+1)==0:
-                    self._playerPos = (self._playerPos[0]+1, self._playerPos[1])
-                elif j%(self._ROOM_SIZE+1)==(self._ROOM_SIZE/2+1) and i%(self._ROOM_SIZE+1):
-                    self._playerPos = (self._playerPos[0]+1, self._playerPos[1])
+        elif self._move == "right" and self._playerPos[0] < self._WIDTH - 2:
+            (i,j)=(self._playerPos[0]+1, self._playerPos[1])
+            if i%(self._ROOM_SIZE+1) ==0 or j%(self._ROOM_SIZE+1)==0: #if wall
+                if i%(self._ROOM_SIZE+1)==(math.floor(self._ROOM_SIZE/2))+1 and j%(self._ROOM_SIZE+1)==0: #if doors
+                    self._playerPos = ((self._playerPos[0]+1), self._playerPos[1])
+                elif j%(self._ROOM_SIZE+1)==(math.floor(self._ROOM_SIZE/2))+1 and i%(self._ROOM_SIZE+1)==0: #if doors
+                    self._playerPos = ((self._playerPos[0]+1), self._playerPos[1])
             else:
-                self._playerPos = (self._playerPos[0] + 1, self._playerPos[1])
+                self._playerPos = ((self._playerPos[0]+1), self._playerPos[1]) 
 
     def draw(self):
         size = width, height = 500, 500
