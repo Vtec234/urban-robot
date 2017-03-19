@@ -29,6 +29,7 @@ class Game:
         self._pgoal = (0, 0)
         self._agoal = (0, 0)
         self.add_goals()
+        self._font = pygame.font.SysFont("monospace", 15)
 
     def get_player_pos(self):
         return self._playerPos
@@ -62,8 +63,6 @@ class Game:
                 if (elem[1] >= minPair[1]) and (elem[1] <= maxPair[1]):
                     newlist.append(elem)
         return newlist
-
-        
 
     def rand_cord(self):
         x = random.randint(0, self._WIDTH)
@@ -319,7 +318,7 @@ class Game:
             if t[0]=="die":
                 self._health = self._health - 1
                 if self._health<=0:
-                    print "LOOSER" #TEXTBOX
+                    print ("LOST")
                 oldMonsters.remove(mon)
             else:
                 if len(t) == 1:
@@ -355,15 +354,16 @@ class Game:
     def path(self):
         monsToFollow=[]
         for mons in self._monsters:
-            if isRoom(mons,_playerPos):
+            if self.isRoom(mons,self._playerPos):
                 monsToFollow.append(mons)
             else:
-                door = which_door(mons,self._playerPos)
-                while (distance(mons,door)>0)
-                    door = which_door(mons,self._playerPos)
-                    self.movemon(mons,followtarget(mons,door))
-        path()
-                
+                door = self.which_door(mons,self._playerPos)
+                if (self.distance(mons,door)>0):
+                    door = self.which_door(mons,self._playerPos)
+                    self.movemon(mons,self.followtarget(mons,door))
+
+        self.follow(monsToFollow)
+
 
     # Runs every game tick (e.g. 1 second)
     #f.e. if we are in the very top, up arrow does not make sense
@@ -409,7 +409,20 @@ class Game:
             else:
                 self._playerPos = ((self._playerPos[0]+1), self._playerPos[1])
 
-        self.follow()
+        self.path()
+
+        for pot in self._potions:
+            if pot == self._playerPos:
+                pass # eat pot
+
+        if (self._playerPos == self._agoal):
+            pass
+            # audience wins
+        elif (self._playerPos == self._pgoal):
+            pass
+            #player wins
+
+
 
     def draw(self):
         size = width, height = 500, 500
@@ -447,9 +460,12 @@ class Game:
 
         player = self.convertToLocal(self._playerPos)
         pygame.draw.circle(screen, blue, [(player[0]*size[0]/(self._ROOM_SIZE+2)+(size[0]/(self._ROOM_SIZE+2)/2)), (player[1]*size[1]/(self._ROOM_SIZE+2))+(size[1]/(self._ROOM_SIZE+2)/2)], 4)
-        for monster in self.filter(self._monsters, (player[2]*(self._ROOM_SIZE+1), player[3]*(self._ROOM_SIZE+1)), ((player[2]*(self._ROOM_SIZE+1)+self._ROOM_SIZE), (player[3]*(self._ROOM_SIZE+1)+self._ROOM_SIZE))):
-            monsterLocal = self.convertToLocal(monster)
-            pygame.draw.circle(screen, red, [(monsterLocal[0]*size[0]/(self._ROOM_SIZE+2)+(size[0]/(self._ROOM_SIZE+2)/2)), (monsterLocal[1]*size[1]/(self._ROOM_SIZE+2))+(size[1]/(self._ROOM_SIZE+2))/2], 4)
+
+       # for monster in self.filter(self._monsters, (player[2]*(self._ROOM_SIZE+1), player[3]*(self._ROOM_SIZE+1)), ((player[2]*(self._ROOM_SIZE+1)+self._ROOM_SIZE), (player[3]*(self._ROOM_SIZE+1)+self._ROOM_SIZE))):
+        for mon in self._monsters:
+            if self.isRoom(mon, self._playerPos):
+                monsterLocal = self.convertToLocal(mon)
+                pygame.draw.circle(screen, red, [(monsterLocal[0]*size[0]/(self._ROOM_SIZE+2)+(size[0]/(self._ROOM_SIZE+2)/2)), (monsterLocal[1]*size[1]/(self._ROOM_SIZE+2))+(size[1]/(self._ROOM_SIZE+2))/2], 4)
 
         pygame.display.update()
 
@@ -471,10 +487,9 @@ class Game:
                 return False
 
         # This is true every second
-        if (int(time.time() * 1000.0)) % self._TICK_MS == 0:
-        #if True:
-            self.tick()
-            self.draw()
+        #if (int(time.time() * 1000.0)) % self._TICK_MS == 0:
+        self.tick()
+        self.draw()
 
         return True
 
