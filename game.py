@@ -29,7 +29,15 @@ class Game:
         self._pgoal = (0, 0)
         self._agoal = (0, 0)
         self.add_goals()
-        self._font = pygame.font.SysFont("monospace", 15)
+        self._font = pygame.font.SysFont("monospace", 25)
+        # Game state
+        # 0 - running
+        # 1 - player won
+        # 2 - audience won
+        # 3 - everybody lost
+        self._state = 0
+        self._size = 500, 500
+        self._screen = pygame.display.set_mode(self._size)
 
     def get_player_pos(self):
         return self._playerPos
@@ -70,11 +78,11 @@ class Game:
         return (x,y)
 
     def convertToLocal(self, globalCoordinates):
-        return (globalCoordinates[0]%(self._ROOM_SIZE+1), globalCoordinates[1]%(self._ROOM_SIZE+1), globalCoordinates[0]/(self._ROOM_SIZE+1), globalCoordinates[1]/(self._ROOM_SIZE)+1)
-        #not including walls - we cannot enter walls apart from doors - special case
+        return (globalCoordinates[0]%(self._ROOM_SIZE+1), globalCoordinates[1]%(self._ROOM_SIZE+1), globalCoordinates[0]/(self._ROOM_SIZE+1), globalCoordinates[1]/(self._ROOM_SIZE+1))
 
     def convertToGlobal(self, localCoordinates):
         return (localCoordinates[2]*(self._ROOM_SIZE+1)+localCoordinates[0], localCoordinates[3]*(self._ROOM_SIZE+1)+localCoordinates[1])
+
     def mhatDist(self, a, b):
         return math.fabs(a[0] - b[0]) + math.fabs(a[1] - b[1])
 
@@ -365,6 +373,16 @@ class Game:
         self.follow(monsToFollow)
 
 
+    def isPlayerPosCorrect(self, pos):
+        return \
+            pos[0] > 0 \
+        and pos[0] < (self._WIDTH - 1) \
+        and pos[1] > 0 \
+        and pos[1] < (self._HEIGHT - 1) \
+        and (pos[0] % (self._ROOM_SIZE + 1) != 0 or pos[1] % (self._ROOM_SIZE + 1) == self._ROOM_SIZE/2) \
+        and (pos[1] % (self._ROOM_SIZE + 1) != 0 or pos[0] % (self._ROOM_SIZE + 1) == self._ROOM_SIZE/2)
+
+
     # Runs every game tick (e.g. 1 second)
     #f.e. if we are in the very top, up arrow does not make sense
     def tick(self):
@@ -415,35 +433,50 @@ class Game:
             if pot == self._playerPos:
                 pass # eat pot
 
-        if (self._playerPos == self._agoal):
-            pass
-            # audience wins
-        elif (self._playerPos == self._pgoal):
-            pass
-            #player wins
+        if self._playerPos == self._pgoal:
+            self._state = 1
+        elif self._playerPos == self._agoal:
+            self._state = 2
 
+        if self._health <= 0:
+            self._state = 3
 
+    def draw_player_won(self):
+        self._screen.fill((0,0,0))
+        label = self._font.render("The player won!", 1, (0,255,0))
+        self._screen.blit(label, (150, 120))
+        pygame.display.update()
+
+    def draw_audience_won(self):
+        self._screen.fill((0,0,0))
+        label = self._font.render("The gods won!", 1, (0,0,255))
+        self._screen.blit(label, (150, 120))
+        pygame.display.update()
+
+    def draw_everybody_lost(self):
+        self._screen.fill((0,0,0))
+        label = self._font.render("Everybody lost!", 1, (255, 0, 0))
+        self._screen.blit(label, (150, 120))
+        pygame.display.update()
 
     def draw(self):
-        size = width, height = 500, 500
         white = (255, 255, 255)
         red = (255, 0, 0)
         black = (0,0,0)
         green = (0, 255, 0)
         blue = (0, 0, 255)
         yellow = (255,255,0)
-        screen = pygame.display.set_mode(size)
         for i in range(0, self._ROOM_SIZE+2):
             for j in range(0, self._ROOM_SIZE+2):
                 if i%(self._ROOM_SIZE+1) ==0 or j%(self._ROOM_SIZE+1)==0: #if wall
                     if i%(self._ROOM_SIZE+1)==(self._ROOM_SIZE/2+1) and j%(self._ROOM_SIZE+1)==0: #if doors
-                        pygame.draw.rect(screen, black, [i*size[0]/(self._ROOM_SIZE+2)+1, j*size[1]/(self._ROOM_SIZE+2)+1, 18, 18])
+                        pygame.draw.rect(self._screen, black, [i*self._size[0]/(self._ROOM_SIZE+2)+1, j*self._size[1]/(self._ROOM_SIZE+2)+1, 18, 18])
                     elif j%(self._ROOM_SIZE+1)==(self._ROOM_SIZE/2+1) and i%(self._ROOM_SIZE+1)==0: #if doors
-                        pygame.draw.rect(screen, black, [i*size[0]/(self._ROOM_SIZE+2)+1, j*size[1]/(self._ROOM_SIZE+2)+1, 18, 18])
+                        pygame.draw.rect(self._screen, black, [i*self._size[0]/(self._ROOM_SIZE+2)+1, j*self._size[1]/(self._ROOM_SIZE+2)+1, 18, 18])
                     else: #print wall
-                        pygame.draw.rect(screen, green, [i*size[0]/(self._ROOM_SIZE+2)+1, j*size[1]/(self._ROOM_SIZE+2)+1, 18, 18])
+                        pygame.draw.rect(self._screen, green, [i*self._size[0]/(self._ROOM_SIZE+2)+1, j*self._size[1]/(self._ROOM_SIZE+2)+1, 18, 18])
                 else:
-                    pygame.draw.rect(screen, white, [i*size[0]/(self._ROOM_SIZE+2)+1, j*size[1]/(self._ROOM_SIZE+2)+1, 18, 18])
+                    pygame.draw.rect(self._screen, white, [i*self._size[0]/(self._ROOM_SIZE+2)+1, j*self._size[1]/(self._ROOM_SIZE+2)+1, 18, 18])
 
         #for k in range(0, self._ROOM_SIZE+2):
         #                    pygame.draw.rect(screen, green, [k*size[0]/self._ROOM_SIZE+1, 0, 18, 18])
@@ -459,13 +492,13 @@ class Game:
 
 
         player = self.convertToLocal(self._playerPos)
-        pygame.draw.circle(screen, blue, [(player[0]*size[0]/(self._ROOM_SIZE+2)+(size[0]/(self._ROOM_SIZE+2)/2)), (player[1]*size[1]/(self._ROOM_SIZE+2))+(size[1]/(self._ROOM_SIZE+2)/2)], 4)
+        pygame.draw.circle(self._screen, blue, [(player[0]*self._size[0]/(self._ROOM_SIZE+2)+(self._size[0]/(self._ROOM_SIZE+2)/2)), (player[1]*self._size[1]/(self._ROOM_SIZE+2))+(self._size[1]/(self._ROOM_SIZE+2)/2)], 4)
 
        # for monster in self.filter(self._monsters, (player[2]*(self._ROOM_SIZE+1), player[3]*(self._ROOM_SIZE+1)), ((player[2]*(self._ROOM_SIZE+1)+self._ROOM_SIZE), (player[3]*(self._ROOM_SIZE+1)+self._ROOM_SIZE))):
         for mon in self._monsters:
             if self.isRoom(mon, self._playerPos):
                 monsterLocal = self.convertToLocal(mon)
-                pygame.draw.circle(screen, red, [(monsterLocal[0]*size[0]/(self._ROOM_SIZE+2)+(size[0]/(self._ROOM_SIZE+2)/2)), (monsterLocal[1]*size[1]/(self._ROOM_SIZE+2))+(size[1]/(self._ROOM_SIZE+2))/2], 4)
+                pygame.draw.circle(self._screen, red, [(monsterLocal[0]*self._size[0]/(self._ROOM_SIZE+2)+(self._size[0]/(self._ROOM_SIZE+2)/2)), (monsterLocal[1]*self._size[1]/(self._ROOM_SIZE+2))+(self._size[1]/(self._ROOM_SIZE+2))/2], 4)
 
         pygame.display.update()
 
@@ -488,8 +521,15 @@ class Game:
 
         # This is true every second
         #if (int(time.time() * 1000.0)) % self._TICK_MS == 0:
-        self.tick()
-        self.draw()
+        if self._state == 0:
+            self.tick()
+            self.draw()
+        elif self._state == 1:
+            self.draw_player_won()
+        elif self._state == 2:
+            self.draw_audience_won()
+        elif self._state == 3:
+            self.draw_everybody_lost()
 
         return True
 
