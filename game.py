@@ -273,7 +273,7 @@ class Game:
     def tick(self):
         localPlayerPos = self.convertToLocal(self._playerPos)
         if self._move == "up" and self._playerPos[1] > 1:
-            (i,j)=(self._playerPos[0], self._playerPos[0] - 1 )
+            (i,j)=(self._playerPos[0], self._playerPos[1] - 1 )
             if i%(self._ROOM_SIZE+1) ==0 or j%(self._ROOM_SIZE+1)==0: #if wall
                 if i%(self._ROOM_SIZE+1)==(self._ROOM_SIZE/2+1) and j%(self._ROOM_SIZE+1)==0: #if doors
                     self._playerPos = (self._playerPos[0], self._playerPos[1] - 1)
@@ -282,12 +282,12 @@ class Game:
             else:
                 self._playerPos = (self._playerPos[0], self._playerPos[1] - 1) 
 
-        elif self._move == "down" and self._playerPos[1] < self._HEIGHT-1:
-            (i,j)=(self._playerPos[0], self._playerPos[0] + 1 )
+        elif self._move == "down" and self._playerPos[1] < self._HEIGHT:
+            (i,j)=(self._playerPos[0], self._playerPos[1] + 1 )
             if i%(self._ROOM_SIZE+1) ==0 or j%(self._ROOM_SIZE+1)==0: #if wall
-                if i%(self._ROOM_SIZE+1)==(self._ROOM_SIZE/2+1) and j%(self._ROOM_SIZE+1)==0: #if doors
+                if i%(self._ROOM_SIZE+1)==(math.floor(self._ROOM_SIZE/2)+1) and j%(self._ROOM_SIZE+1)==0: #if doors
                     self._playerPos = (self._playerPos[0], self._playerPos[1] + 1)
-                elif j%(self._ROOM_SIZE+1)==(self._ROOM_SIZE/2+1) and i%(self._ROOM_SIZE+1)==0: #if doors
+                elif j%(self._ROOM_SIZE+1)==(math.floor(self._ROOM_SIZE/2)+1) and i%(self._ROOM_SIZE+1)==0: #if doors
                     self._playerPos = (self._playerPos[0], self._playerPos[1] + 1)
             else:
                 self._playerPos = (self._playerPos[0], self._playerPos[1] + 1) 
@@ -302,7 +302,7 @@ class Game:
             else:
                 self._playerPos = (self._playerPos[0] - 1, self._playerPos[1])
 
-        elif self._move == "right" and self._playerPos[0] < self._WIDTH-1:
+        elif self._move == "right" and self._playerPos[0] < self._WIDTH:
             (i, j) =(self._playerPos[0]+1, self._playerPos[1])
             if i%(self._ROOM_SIZE+1)==0 or j%(self._ROOM_SIZE+1)==0:
                 if i%(self._ROOM_SIZE+1)==(self._ROOM_SIZE/2+1) and j%(self._ROOM_SIZE+1)==0:
@@ -333,17 +333,17 @@ class Game:
                 else:
                     pygame.draw.rect(screen, white, [i*size[0]/(self._ROOM_SIZE+2)+1, j*size[1]/(self._ROOM_SIZE+2)+1, 18, 18])
 
-        for k in range(0, self._ROOM_SIZE+2):
-                            pygame.draw.rect(screen, green, [k*size[0]/self._ROOM_SIZE+1, 0, 18, 18])
+        #for k in range(0, self._ROOM_SIZE+2):
+        #                    pygame.draw.rect(screen, green, [k*size[0]/self._ROOM_SIZE+1, 0, 18, 18])
 
-        for k in range(0, self._ROOM_SIZE+2):
-                            pygame.draw.rect(screen, green, [k*size[0]/self._ROOM_SIZE+1, (size[1]-size[1]/(self._ROOM_SIZE+2)-1), 18, 18])
+        #for k in range(0, self._ROOM_SIZE+2):
+        #                    pygame.draw.rect(screen, green, [k*size[0]/self._ROOM_SIZE+1, (size[1]-size[1]/(self._ROOM_SIZE+2)-1), 18, 18])
 
-        for k in range(0, self._ROOM_SIZE+2):
-                            pygame.draw.rect(screen, green, [0, k*size[0]/self._ROOM_SIZE+1, 18, 18])
+        #for k in range(0, self._ROOM_SIZE+2):
+        #                    pygame.draw.rect(screen, green, [0, k*size[0]/self._ROOM_SIZE+1, 18, 18])
 
-        for k in range(0, self._ROOM_SIZE+2):
-                            pygame.draw.rect(screen, green, [(size[0]-size[0]/(self._ROOM_SIZE+2)-1), k*size[1]/self._ROOM_SIZE+1, 18, 18])
+        #for k in range(0, self._ROOM_SIZE+2):
+        #                    pygame.draw.rect(screen, green, [(size[0]-size[0]/(self._ROOM_SIZE+2)-1), k*size[1]/self._ROOM_SIZE+1, 18, 18])
 
 
         player = self.convertToLocal(self._playerPos)
@@ -372,7 +372,7 @@ class Game:
                 return False
 
         # This is true every second
-        if (int(time.time() * 1000.0)) % self._TICK_MS == 0:
+        if (int(time.time() * 5000.0)) % self._TICK_MS == 0:
         #if True:
             self.tick()
             self.draw()
