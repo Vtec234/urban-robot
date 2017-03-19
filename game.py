@@ -16,9 +16,10 @@ class Game:
     def __init__(self):
         self._WIDTH = 175
         self._HEIGHT = 175
-        self._GRIDSIZE = 35
         self._POTIONS_LIMIT = 3
         self._MONSTERS_LIMIT = 10
+        self._TICK_MS = 1000
+        self._ROOM_SIZE = 35
         self._playerPos = (self._WIDTH/2, self._HEIGHT/2)
         self._move = ""
         self._monsters = []
@@ -57,6 +58,14 @@ class Game:
                 if (elem[1] >= minPair[1]) and (elem[1] <= maxPair[1]):
                     newlist.append(elem)
         return newlist
+
+    @staticmethod
+    def convertToLocal(self, globalCoordinates):
+        return (globalCoordinates[0]%self._ROOM_SIZE, globalCoordinates[1]%self._ROOM_SIZE, globalCoordinates[0]/self._ROOM_SIZE, globalCoordinates[1]/self._ROOM_SIZE)
+
+    @staticmethod
+    def convertToGlobal(self, localCoordinates):
+        return (localCoordinates[2]*self._ROOM_SIZE+localCoordinates[0], localCoordinates[3]*self._ROOM_SIZE+localCoordinates[1])
 
     def not_too_close(self, pos):
         if self.distance(pos, self._playerPos) < self._mindist:
@@ -112,23 +121,25 @@ class Game:
         while self.distance(self._agoal, self._playerPos) > (10 * self._mindist) or self.distance(self._agoal, self._pgoal) > (5 * self._mindist):
             self._agoal = (20, 20)
 
+
     # Runs every game tick (e.g. 1 second)
     def tick(self):
         if self._move == "up" and self._playerPos[1] > 0:
-            self._playerPos[1] -= 1
+            self._playerPos[1] == self._playerPos[1] - 1
         elif self._move == "down" and self._playerPos[1] < self._HEIGHT:
-            self._playerPos[1] += 1
+            self._playerPos[1] == self._playerPos[1] + 1
         elif self._move == "left" and self._playerPos[0] > 0:
-            self._playerPos[0] -= 1
+            self._playerPos[0] == self._playerPos[0] - 1
         elif self._move == "right" and self._playerPos[0] < self._WIDTH:
-            self._playerPos[0] += 1
+            self._playerPos[0] == self._playerPos[0] + 1
 
     def draw(self):
         size = width, height = 700, 700
         white = (255, 255, 255)
+        red = (255, 0, 0)
         screen = pygame.display.set_mode(size)
-        for i in range(0, self._GRIDSIZE):
-            for j in range(0, self._GRIDSIZE):
+        for i in range(0, self._ROOM_SIZE):
+            for j in range(0, self._ROOM_SIZE):
                 pygame.draw.rect(screen, white, [i*20+1, j*20+1, 18, 18])
 
         pygame.display.update()
@@ -151,12 +162,11 @@ class Game:
                 return False
 
         # This is true every second
-        if (int(time.time() * 1000.0)) % 1000 == 0:
+        if (int(time.time() * 1000.0)) % self._TICK_MS == 0:
             self.tick()
             self.draw()
 
         return True
-
 
 def main():
     pygame.init()
