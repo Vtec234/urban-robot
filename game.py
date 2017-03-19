@@ -44,14 +44,13 @@ class Game:
     def get_audience_goal(self):
         return self._agoal
 
-    @staticmethod
-    def distance(a, b):
-        if isRoom(a,b) == True:
-            dist = math.fatm(a[0] - b[0]) + math.fatm(a[1] - b[1])
+    def distance(self, a, b):
+        if self.isRoom(a,b) == True:
+            dist = math.fabs(a[0] - b[0]) + math.fabs(a[1] - b[1])
             return dist
         else:
-            p = which_door(a,b)
-            dist = math.fatm(a[0] - p[0]) + math.fatm(a[1] - p[1]) + math.fatm(p[0] - b[0]) + math.fatm(p[1] - b[1])
+            p = self.which_door(a,b)
+            dist = math.fabs(a[0] - p[0]) + math.fabs(a[1] - p[1]) + math.fabs(p[0] - b[0]) + math.fabs(p[1] - b[1])
 
     # Returns elements of list that fit between minPair and maxPair on both X-axis and Y-axis
     @staticmethod
@@ -62,6 +61,11 @@ class Game:
                 if (elem[1] >= minPair[1]) and (elem[1] <= maxPair[1]):
                     newlist.append(elem)
         return newlist
+
+    def rand_cord(self):
+        x = random.randint(0, self._WIDTH)
+        y = random.randint(0, self._HEIGHT)
+        return (x,y)
 
     def convertToLocal(self, globalCoordinates):
         return (globalCoordinates[0]%(self._ROOM_SIZE+1), globalCoordinates[1]%(self._ROOM_SIZE+1), globalCoordinates[0]/(self._ROOM_SIZE+1), globalCoordinates[1]/(self._ROOM_SIZE)+1)
@@ -117,18 +121,14 @@ class Game:
 
         #random 2 numbers: coordinates of goals, if too close, repeat
     def add_goals(self):
-        self._pgoal = rand_cord(self._WIDTH, self._HEIGHT)
+        self._pgoal = self.rand_cord()
         while self.distance(self._pgoal, self._playerPos) > (10 * self._mindist):
-            self._pgoal = rand_cord(self._WIDTH, self._HEIGHT)
+            self._pgoal = self.rand_cord()
 
-        self._agoal = rand_cord(self._WIDTH, self._HEIGHT)
+        self._agoal = self.rand_cord()
         while self.distance(self._agoal, self._playerPos) > (10 * self._mindist) or self.distance(self._agoal, self._pgoal) > (5 * self._mindist):
-            self._agoal = rand_cord(self._WIDTH, self._HEIGHT)
+            self._agoal = self.rand_cord()
 
-    def rand_cord(self):
-        x = random.randint(0, self._WIDTH)
-        y = random.randint(0, self._HEIGHT)
-        return (x,y)
 
     def isRoom(self,a,b):
         #describe doors on the right
@@ -139,27 +139,27 @@ class Game:
         s = math.ceil(a[1]/24)
         r = math.floor(a[0]/24)+12
         botto = (r,s)
-        if (convertToGlobal(a)[2] == (convertToGlobal(b)[2] and convertToGlobal(a)[3] == convertToGlobal(b)[3]) or righ==b or botto==b):
+        if (self.convertToGlobal(a)[2] == (self.convertToGlobal(b)[2] and self.convertToGlobal(a)[3] == self.convertToGlobal(b)[3]) or righ==b or botto==b):
             return True 
         else:
             return False
 
     def isneigh(self,a,b):
-        if convertToGlobal(a)[2]== 1 + convertToGlobal(b)[2] or convertToGlobal(a)[2]==convertToGlobal(b)[2] - 1:
+        if self.convertToGlobal(a)[2]== 1 + self.convertToGlobal(b)[2] or self.convertToGlobal(a)[2]==self.convertToGlobal(b)[2] - 1:
             return True 
-        if convertToGlobal(a)[3]== 1 + convertToGlobal(b)[3] or convertToGlobal(a)[3]==convertToGlobal(b)[3] - 1:
+        if self.convertToGlobal(a)[3]== 1 + self.convertToGlobal(b)[3] or self.convertToGlobal(a)[3]==self.convertToGlobal(b)[3] - 1:
             return True
         return False
 
     def link_doors(self,a,b):
-        if isneigh(a,b)==True:
+        if self.isneigh(a,b)==True:
             #positions of rooms that a,b belong to
             #order DOES matter, from a to b
             #works for walls - special cases. generally cool
-            m = convertToGlobal(a)[2]
-            n = convertToGlobal(a)[3]
-            p = convertToGlobal(b)[2]
-            q = convertToGlobal(b)[3]
+            m = self.convertToGlobal(a)[2]
+            n = self.convertToGlobal(a)[3]
+            p = self.convertToGlobal(b)[2]
+            q = self.convertToGlobal(b)[3]
 
             if m == p:
                 y = m* (self._ROOM_SIZE+1) + (self._ROOM_SIZE+1)/2
@@ -177,7 +177,7 @@ class Game:
                 return(x,y)
 
         else:
-             which_door(a,b)
+             self.which_door(a,b)
 
 
     #return which door by comparing two options
@@ -195,11 +195,11 @@ class Game:
                 point1 = (k,n)
                 point2 = (m,l)
 
-                door1 = link_doors(a,point1)
-                door2 = link_doors(a,point2)
+                door1 = self.link_doors(a,point1)
+                door2 = self.link_doors(a,point2)
 
                 #add to two distances - one from point to doors and another from doors to target
-                dist1 = math.favs(door1[0] - p) + math.fabs(door1[1] - q) + math.fabs(m - door1[0]) + math.fabs(n - door1[1])
+                dist1 = math.fabs(door1[0] - p) + math.fabs(door1[1] - q) + math.fabs(m - door1[0]) + math.fabs(n - door1[1])
                 dist2 = math.fabs(door2[0] - p) + math.fabs(door2[1] - q) + math.fabs(m - door2[0]) + math.fabs(n - door2[1])
 
                 if (dist1 <= dist2):
@@ -215,11 +215,11 @@ class Game:
                 point1 = (k,n)
                 point2 = (m,l)
 
-                door1 = link_doors(a,point1)
-                door2 = link_doors(a,point2)
+                door1 = self.link_doors(a,point1)
+                door2 = self.link_doors(a,point2)
 
                 #add to two distances - from point to doors and from doors to target
-                dist1 = math.favs(door1[0] - p) + math.fabs(door1[1] - q) + math.fabs(m - door1[0]) + math.fabs(n - door1[1])
+                dist1 = math.fabs(door1[0] - p) + math.fabs(door1[1] - q) + math.fabs(m - door1[0]) + math.fabs(n - door1[1])
                 dist2 = math.fabs(door2[0] - p) + math.fabs(door2[1] - q) + math.fabs(m - door2[0]) + math.fabs(n - door2[1])
 
                 if (dist1 <= dist2):
@@ -236,11 +236,11 @@ class Game:
                 point1 = (k,n)
                 point2 = (m,l)
 
-                door1 = link_doors(a,point1)
-                door2 = link_doors(a,point2)
+                door1 = self.link_doors(a,point1)
+                door2 = self.link_doors(a,point2)
 
                 #add to two distances - from point to doors and from doors to target
-                dist1 = math.favs(door1[0] - p) + math.fabs(door1[1] - q) + math.fabs(m - door1[0]) + math.fabs(n - door1[1])
+                dist1 = math.fabs(door1[0] - p) + math.fabs(door1[1] - q) + math.fabs(m - door1[0]) + math.fabs(n - door1[1])
                 dist2 = math.fabs(door2[0] - p) + math.fabs(door2[1] - q) + math.fabs(m - door2[0]) + math.fabs(n - door2[1])
 
                 if (dist1 <= dist2):
@@ -256,20 +256,17 @@ class Game:
                 point1 = (k,n)
                 point2 = (m,l)
 
-                door1 = link_doors(a,point1)
-                door2 = link_doors(a,point2)
+                door1 = self.link_doors(a,point1)
+                door2 = self.link_doors(a,point2)
 
                 #add to two distances - from point to doors and from doors to target
-                dist1 = math.favs(door1[0] - p) + math.fabs(door1[1] - q) + math.fabs(m - door1[0]) + math.fabs(n - door1[1])
+                dist1 = math.fabs(door1[0] - p) + math.fabs(door1[1] - q) + math.fabs(m - door1[0]) + math.fabs(n - door1[1])
                 dist2 = math.fabs(door2[0] - p) + math.fabs(door2[1] - q) + math.fabs(m - door2[0]) + math.fabs(n - door2[1])
 
                 if (dist1 <= dist2):
                     return door1
                 else:
                     return door2
-
-
-#finish of above function
 
     # Runs every game tick (e.g. 1 second)
     #f.e. if we are in the very top, up arrow does not make sense
@@ -301,7 +298,7 @@ class Game:
                 if i%(self._ROOM_SIZE+1)==(self._ROOM_SIZE/2+1) and j%(self._ROOM_SIZE+1)==0:
                     self._playerPos = (self._playerPos[0]-1, self._playerPos[1])
                 elif j%(self._ROOM_SIZE+1)==(self._ROOM_SIZE/2+1) and i%(self._ROOM_SIZE+1):
-                    self._playerPos = (self._players[0]-1, self._playerPos[1])
+                    self._playerPos = (self._playerPos[0]-1, self._playerPos[1])
             else:
                 self._playerPos = (self._playerPos[0] - 1, self._playerPos[1])
 
@@ -311,7 +308,7 @@ class Game:
                 if i%(self._ROOM_SIZE+1)==(self._ROOM_SIZE/2+1) and j%(self._ROOM_SIZE+1)==0:
                     self._playerPos = (self._playerPos[0]+1, self._playerPos[1])
                 elif j%(self._ROOM_SIZE+1)==(self._ROOM_SIZE/2+1) and i%(self._ROOM_SIZE+1):
-                    self._playerPos = (self._players[0]+1, self._playerPos[1])
+                    self._playerPos = (self._playerPos[0]+1, self._playerPos[1])
             else:
                 self._playerPos = (self._playerPos[0] + 1, self._playerPos[1])
 
@@ -351,7 +348,7 @@ class Game:
 
         player = self.convertToLocal(self._playerPos)
         pygame.draw.circle(screen, blue, [(player[0]*size[0]/(self._ROOM_SIZE+2)+(size[0]/(self._ROOM_SIZE+2)/2)), (player[1]*size[1]/(self._ROOM_SIZE+2))+(size[1]/(self._ROOM_SIZE+2)/2)], 4)
-        for monster in self.filter(self._monsters, (player[2]*(self._ROOM_SIZE+1), player[3]*(self._ROOM_SIZE+1)), (player[2]*(self._ROOM_SIZE+1)+self._ROOM_SIZE), (player[3]*(self._ROOM_SIZE+1)+self._ROOM_SIZE)):
+        for monster in self.filter(self._monsters, (player[2]*(self._ROOM_SIZE+1), player[3]*(self._ROOM_SIZE+1)), ((player[2]*(self._ROOM_SIZE+1)+self._ROOM_SIZE), (player[3]*(self._ROOM_SIZE+1)+self._ROOM_SIZE))):
             monsterLocal = self.convertToLocal(monster)
             pygame.draw.circle(screen, red, [(monsterLocal[0]*size[0]/(self._ROOM_SIZE+2)+(size[0]/(self._ROOM_SIZE+2)/2)), (monsterLocal[1]*size[1]/(self._ROOM_SIZE+2))+(size[1]/(self._ROOM_SIZE+2))/2], 4)
 
@@ -375,8 +372,8 @@ class Game:
                 return False
 
         # This is true every second
-        #if (int(time.time() * 1000.0)) % self._TICK_MS == 0:
-        if True:
+        if (int(time.time() * 1000.0)) % self._TICK_MS == 0:
+        #if True:
             self.tick()
             self.draw()
 
