@@ -12,7 +12,9 @@ import pygame
 from game import Game
 
 pygame.init()
+pygame.mixer.music.load("./loop.ogg")
 game = Game()
+pygame.mixer.music.play(-1)
 
 app = Flask(__name__)
 sockets = Sockets(app)
@@ -43,7 +45,7 @@ def spam_handler():
         var socket = new WebSocket(spammer_link);
         socket.onopen = function() {
             function recurse() {
-                setTimeout(recurse, 100);
+                setTimeout(recurse, 250);
                 socket.send(1);
             }
 
@@ -91,6 +93,7 @@ def handler():
     </head>
     <body>
     <canvas id="map" width="800" height="800"></canvas>
+    <input id="monsterBox" type="checkbox">
     <script>
     window.onload = function() {
         var link = \"ws\" + document.location.origin.substr(4) + \"/client\";
@@ -146,7 +149,7 @@ def handler():
                 socket.send(son);
             }
 
-            var monsterNotPotion = true;
+            var monsterNotPotion = false;
             function spawn(posX, posY) {
                 if (monsterNotPotion) {
                     spawnMonster([posX, posY]);
@@ -243,8 +246,17 @@ def handler():
             }
 
             function recurse() {
-                setTimeout(recurse, 500);
                 reqWorld();
+
+                var box = document.getElementById("monsterBox");
+                if (box.checked) {
+                    monsterNotPotion = true;
+                }
+                else {
+                    monsterNotPotion = false;
+                }
+
+                setTimeout(recurse, 500);
             }
 
             begin();
