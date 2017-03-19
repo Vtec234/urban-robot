@@ -21,9 +21,14 @@ sockets = Sockets(app)
 @sockets.route("/spammer")
 def spammer_socket(ws):
     while not ws.closed:
-        result = game.update()
-        if not result:
-            sys.exit()
+        try:
+            result = game.update()
+            if not result:
+                pygame.quit()
+                sys.exit()
+        except:
+            print("exception occurred", sys.exc_info())
+
         ws.receive()
 
 @app.route("/spamTheHellOutOfTheServer")
@@ -33,15 +38,18 @@ def spam_handler():
     </head>
     <body>
     <script>
-    var spammer_link = "ws" + document.location.origin.substr(4) + "/spammer";
-    var socket = new WebSocket(spammer_link);
+    window.onload = function() {
+        var spammer_link = "ws" + document.location.origin.substr(4) + "/spammer";
+        var socket = new WebSocket(spammer_link);
+        socket.onopen = function() {
+            function recurse() {
+                setTimeout(recurse, 100);
+                socket.send(1);
+            }
 
-    function recurse() {
-        setTimeout(recurse, 500);
-        socket.send(1);
-    }
-
-    recurse();
+            recurse();
+        };
+    };
     </script>
     </body>"""
 
@@ -100,7 +108,6 @@ def handler():
             var pgoal = [0, 0];
             var agoal = [0, 0];
 
-
             socket.onmessage = function (msg) {
                 var data = JSON.parse(msg.data);
                 console.log(data);
@@ -139,7 +146,7 @@ def handler():
                 socket.send(son);
             }
 
-            var monsterNotPotion = false;
+            var monsterNotPotion = true;
             function spawn(posX, posY) {
                 if (monsterNotPotion) {
                     spawnMonster([posX, posY]);

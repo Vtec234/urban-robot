@@ -18,16 +18,17 @@ class Game:
         self._HEIGHT = 5*24+1
         self._POTIONS_LIMIT = 3
         self._MONSTERS_LIMIT = 10
-        self._TICK_MS = 1000
+        self._TICK_MS = 500
         self._ROOM_SIZE = 23
         self._playerPos = (self._WIDTH/2, self._HEIGHT/2)
         self._move = ""
         self._monsters = []
         self._potions = []
         self._health = 5
-        self._mindist = 4
+        self._mindist = 7
         self._pgoal = (0, 0)
         self._agoal = (0, 0)
+        self.add_goals()
 
     def get_player_pos(self):
         return self._playerPos
@@ -73,26 +74,28 @@ class Game:
 
     def convertToGlobal(self, localCoordinates):
         return (localCoordinates[2]*(self._ROOM_SIZE+1)+localCoordinates[0], localCoordinates[3]*(self._ROOM_SIZE+1)+localCoordinates[1])
+    def mhatDist(self, a, b):
+        return math.fabs(a[0] - b[0]) + math.fabs(a[1] - b[1])
 
     def not_too_close(self, pos):
-        if self.distance(pos, self._playerPos) < self._mindist:
+        if self.mhatDist(pos, self._playerPos) < self._mindist:
             return False
 
         #if too close to goals
-        if self.distance(pos, self._pgoal) < self._mindist/2:
+        if self.mhatDist(pos, self._pgoal) < self._mindist/2:
             return False
 
-        if self.distance(pos, self._agoal) < self._mindist/2:
+        if self.mhatDist(pos, self._agoal) < self._mindist/2:
             return False
 
         #if too close to HPs
         for ptn in self._potions:
-            if self.distance(ptn, pos) < self._mindist/4:
+            if self.mhatDist(ptn, pos) < self._mindist/4:
                 return False
 
         #if too close to monsters
         for mon in self._monsters:
-            if self.distance(mon, pos) < self._mindist:
+            if self.mhatDist(mon, pos) < self._mindist:
                 return False
 
         return True
@@ -104,7 +107,7 @@ class Game:
 
     def spawn_monster(self, pos):
         #if too close to player
-        if self.not_too_close(pos):
+        if self.not_too_close(pos) and pos[0] % 24 != 0 and pos[1] % 24 != 0:
             self._monsters.append(pos)
             return True
 
@@ -113,7 +116,7 @@ class Game:
     # new potion
     def spawn_potion(self, pos):
         #if too close to player
-        if self.not_too_close(pos):
+        if self.not_too_close(pos) and pos[0] % 24 != 0 and pos[1] % 24 != 0:
             self._potions.append(pos)
             return True
 
@@ -129,7 +132,6 @@ class Game:
         while self.distance(self._agoal, self._playerPos) > (10 * self._mindist) or self.distance(self._agoal, self._pgoal) > (5 * self._mindist):
             self._agoal = self.rand_cord()
 
-
     def isRoom(self,a,b):
         #describe doors on the right
         p = math.ceil(a[0]/24)
@@ -139,15 +141,17 @@ class Game:
         s = math.ceil(a[1]/24)
         r = math.floor(a[0]/24)+12
         botto = (r,s)
-        if (self.convertToGlobal(a)[2] == (self.convertToGlobal(b)[2] and self.convertToGlobal(a)[3] == self.convertToGlobal(b)[3]) or righ==b or botto==b):
-            return True 
+        if (self.convertToLocal(a)[2] == (self.convertToLocal(b)[2] and self.convertToLocal(a)[3] == self.convertToLocal(b)[3]) or righ==b or botto==b):
+            return True
         else:
             return False
 
     def isneigh(self,a,b):
-        if self.convertToGlobal(a)[2]== 1 + self.convertToGlobal(b)[2] or self.convertToGlobal(a)[2]==self.convertToGlobal(b)[2] - 1:
-            return True 
-        if self.convertToGlobal(a)[3]== 1 + self.convertToGlobal(b)[3] or self.convertToGlobal(a)[3]==self.convertToGlobal(b)[3] - 1:
+        loc_a = self.convertToLocal(a)
+        loc_b = self.convertToLocal(b)
+        if loc_a[2]== 1 + loc_b[2] or loc_a[2]==loc_b[2] - 1:
+            return True
+        if loc_a[3]== 1 + loc_b[3] or loc_a[3]==loc_b[3] - 1:
             return True
         return False
 
@@ -156,10 +160,10 @@ class Game:
             #positions of rooms that a,b belong to
             #order DOES matter, from a to b
             #works for walls - special cases. generally cool
-            m = self.convertToGlobal(a)[2]
-            n = self.convertToGlobal(a)[3]
-            p = self.convertToGlobal(b)[2]
-            q = self.convertToGlobal(b)[3]
+            m = self.convertToLocal(a)[2]
+            n = self.convertToLocal(a)[3]
+            p = self.convertToLocal(b)[2]
+            q = self.convertToLocal(b)[3]
 
             if m == p:
                 y = m* (self._ROOM_SIZE+1) + (self._ROOM_SIZE+1)/2
@@ -280,13 +284,13 @@ class Game:
         if (str=="left"):
             m = (m[0]-1,m[1])
 
-        if (str=="right"): 
+        if (str=="right"):
             m = (m[0]+1,m[1])
-        
+
         if (str=="up"):
             m = (m[0],m[1]-1)
 
-        if (str=="down"): 
+        if (str=="down"):
             m = (m[0],m[1]+1)
 
         return m
@@ -309,27 +313,23 @@ class Game:
     def follow(self):
         newMonsters = []
         for mon in self._monsters:
-            t = check(mon)
+            t = self.check(mon)
             if t[0]=="die":
                 self._health = self._health - 1
                 self._monsters.remove(mon)
             else:
                 if len(t) == 1:
-                    newMonsters.append(movemon(mon,el))
-                else: 
+                    newMonsters.append(self.movemon(mon,t[0]))
+                else:
                     num = self.rand_cord()
                     if num[0]>=num[1]:
-                        newMonsters.append(movemon(mon,t[0]))
+                        newMonsters.append(self.movemon(mon,t[0]))
                     else:
-                        newMonsters.append(movemon(mon,t[1]))
+                        newMonsters.append(self.movemon(mon,t[1]))
         for i in range(0,len(self._monsters)-1):
             for j in range(i,len(self._monsters)-1):
                 if newMonsters[i]==newMonsters[j]:
-                    newMonster[j]=self._monsters[j]
-
-                        
-
-
+                    newMonsters[j]=self._monsters[j]
 
     # Runs every game tick (e.g. 1 second)
     #f.e. if we are in the very top, up arrow does not make sense
@@ -343,7 +343,7 @@ class Game:
                 elif j%(self._ROOM_SIZE+1)==(self._ROOM_SIZE/2+1) and i%(self._ROOM_SIZE+1)==0: #if doors
                     self._playerPos = (self._playerPos[0], self._playerPos[1] - 1)
             else:
-                self._playerPos = (self._playerPos[0], self._playerPos[1] - 1) 
+                self._playerPos = (self._playerPos[0], self._playerPos[1] - 1)
 
         elif self._move == "down" and self._playerPos[1] < self._HEIGHT - 2:
             (i,j)=(self._playerPos[0], self._playerPos[1] + 1 )
@@ -353,7 +353,7 @@ class Game:
                 elif j%(self._ROOM_SIZE+1)==(math.floor(self._ROOM_SIZE/2)+1) and i%(self._ROOM_SIZE+1)==0: #if doors
                     self._playerPos = (self._playerPos[0], self._playerPos[1] + 1)
             else:
-                self._playerPos = (self._playerPos[0], self._playerPos[1] + 1) 
+                self._playerPos = (self._playerPos[0], self._playerPos[1] + 1)
 
         elif self._move == "left" and self._playerPos[0] > 1:
             (i,j)=(self._playerPos[0]-1, self._playerPos[1])
@@ -363,7 +363,7 @@ class Game:
                 elif j%(self._ROOM_SIZE+1)==(math.floor(self._ROOM_SIZE/2))+1 and i%(self._ROOM_SIZE+1)==0: #if doors
                     self._playerPos = ((self._playerPos[0]-1), self._playerPos[1])
             else:
-                self._playerPos = ((self._playerPos[0]-1), self._playerPos[1]) 
+                self._playerPos = ((self._playerPos[0]-1), self._playerPos[1])
 
         elif self._move == "right" and self._playerPos[0] < self._WIDTH - 2:
             (i,j)=(self._playerPos[0]+1, self._playerPos[1])
@@ -373,7 +373,9 @@ class Game:
                 elif j%(self._ROOM_SIZE+1)==(math.floor(self._ROOM_SIZE/2))+1 and i%(self._ROOM_SIZE+1)==0: #if doors
                     self._playerPos = ((self._playerPos[0]+1), self._playerPos[1])
             else:
-                self._playerPos = ((self._playerPos[0]+1), self._playerPos[1]) 
+                self._playerPos = ((self._playerPos[0]+1), self._playerPos[1])
+
+        self.follow()
 
     def draw(self):
         size = width, height = 500, 500
@@ -435,7 +437,7 @@ class Game:
                 return False
 
         # This is true every second
-        if (int(time.time() * 5000.0)) % self._TICK_MS == 0:
+        if (int(time.time() * 1000.0)) % self._TICK_MS == 0:
         #if True:
             self.tick()
             self.draw()
