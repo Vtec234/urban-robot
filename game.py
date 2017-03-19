@@ -22,14 +22,14 @@ class Game:
         self._ROOM_SIZE = 23
         self._playerPos = (self._WIDTH/2, self._HEIGHT/2)
         self._move = ""
-        self._monsters = [(60,60),(50,50),(70,70),(55,55),(25,25),(100,100)]
+        self._monsters = []
         self._potions = []
         self._health = 5
         self._mindist = 7
         self._pgoal = (0, 0)
         self._agoal = (0, 0)
         self.add_goals()
-        self._font = pygame.font.SysFont("monospace", 25)
+        self._font = pygame.font.SysFont("Liberation Sans Mono", 40)
         # Game state
         # 0 - running
         # 1 - player won
@@ -288,7 +288,6 @@ class Game:
     #finally go the same room
     #before each move check validity
     #validity - not wall + 2 monsters not in 1 place
-
     def movemon(self,m,str):
         if (str=="left"):
             m = (m[0]-1,m[1])
@@ -372,66 +371,59 @@ class Game:
 
         self.follow(monsToFollow)
 
-
-    def isPlayerPosCorrect(self, pos):
+    def isEntityPosCorrect(self, pos):
         return \
             pos[0] > 0 \
         and pos[0] < (self._WIDTH - 1) \
         and pos[1] > 0 \
         and pos[1] < (self._HEIGHT - 1) \
-        and (pos[0] % (self._ROOM_SIZE + 1) != 0 or pos[1] % (self._ROOM_SIZE + 1) == self._ROOM_SIZE/2) \
-        and (pos[1] % (self._ROOM_SIZE + 1) != 0 or pos[0] % (self._ROOM_SIZE + 1) == self._ROOM_SIZE/2)
-
+        and (pos[0] % (self._ROOM_SIZE + 1) != 0 or pos[1] % (self._ROOM_SIZE + 1) == (self._ROOM_SIZE/2 + 1)) \
+        and (pos[1] % (self._ROOM_SIZE + 1) != 0 or pos[0] % (self._ROOM_SIZE + 1) == (self._ROOM_SIZE/2 + 1))
 
     # Runs every game tick (e.g. 1 second)
     #f.e. if we are in the very top, up arrow does not make sense
     def tick(self):
-        localPlayerPos = self.convertToLocal(self._playerPos)
-        if self._move == "up" and self._playerPos[1] > 1:
-            (i,j)=(self._playerPos[0], self._playerPos[1] - 1 )
-            if i%(self._ROOM_SIZE+1) ==0 or j%(self._ROOM_SIZE+1)==0: #if wall
-                if i%(self._ROOM_SIZE+1)==(self._ROOM_SIZE/2+1) and j%(self._ROOM_SIZE+1)==0: #if doors
-                    self._playerPos = (self._playerPos[0], self._playerPos[1] - 1)
-                elif j%(self._ROOM_SIZE+1)==(self._ROOM_SIZE/2+1) and i%(self._ROOM_SIZE+1)==0: #if doors
-                    self._playerPos = (self._playerPos[0], self._playerPos[1] - 1)
-            else:
-                self._playerPos = (self._playerPos[0], self._playerPos[1] - 1)
+        if self._move == "up":
+            new = (self._playerPos[0], self._playerPos[1] - 1)
+            if self.isEntityPosCorrect(new):
+                self._playerPos = new
 
-        elif self._move == "down" and self._playerPos[1] < self._HEIGHT - 2:
-            (i,j)=(self._playerPos[0], self._playerPos[1] + 1 )
-            if i%(self._ROOM_SIZE+1) ==0 or j%(self._ROOM_SIZE+1)==0: #if wall
-                if i%(self._ROOM_SIZE+1)==(math.floor(self._ROOM_SIZE/2)+1) and j%(self._ROOM_SIZE+1)==0: #if doors
-                    self._playerPos = (self._playerPos[0], self._playerPos[1] + 1)
-                elif j%(self._ROOM_SIZE+1)==(math.floor(self._ROOM_SIZE/2)+1) and i%(self._ROOM_SIZE+1)==0: #if doors
-                    self._playerPos = (self._playerPos[0], self._playerPos[1] + 1)
-            else:
-                self._playerPos = (self._playerPos[0], self._playerPos[1] + 1)
+        elif self._move == "down":
+            new = (self._playerPos[0], self._playerPos[1] + 1)
+            if self.isEntityPosCorrect(new):
+                self._playerPos = new
 
-        elif self._move == "left" and self._playerPos[0] > 1:
-            (i,j)=(self._playerPos[0]-1, self._playerPos[1])
-            if i%(self._ROOM_SIZE+1) ==0 or j%(self._ROOM_SIZE+1)==0: #if wall
-                if i%(self._ROOM_SIZE+1)==(math.floor(self._ROOM_SIZE/2))+1 and j%(self._ROOM_SIZE+1)==0: #if doors
-                    self._playerPos = ((self._playerPos[0]-1), self._playerPos[1])
-                elif j%(self._ROOM_SIZE+1)==(math.floor(self._ROOM_SIZE/2))+1 and i%(self._ROOM_SIZE+1)==0: #if doors
-                    self._playerPos = ((self._playerPos[0]-1), self._playerPos[1])
-            else:
-                self._playerPos = ((self._playerPos[0]-1), self._playerPos[1])
+        elif self._move == "left":
+            new = (self._playerPos[0] - 1, self._playerPos[1])
+            if self.isEntityPosCorrect(new):
+                self._playerPos = new
 
-        elif self._move == "right" and self._playerPos[0] < self._WIDTH - 2:
-            (i,j)=(self._playerPos[0]+1, self._playerPos[1])
-            if i%(self._ROOM_SIZE+1) ==0 or j%(self._ROOM_SIZE+1)==0: #if wall
-                if i%(self._ROOM_SIZE+1)==(math.floor(self._ROOM_SIZE/2))+1 and j%(self._ROOM_SIZE+1)==0: #if doors
-                    self._playerPos = ((self._playerPos[0]+1), self._playerPos[1])
-                elif j%(self._ROOM_SIZE+1)==(math.floor(self._ROOM_SIZE/2))+1 and i%(self._ROOM_SIZE+1)==0: #if doors
-                    self._playerPos = ((self._playerPos[0]+1), self._playerPos[1])
-            else:
-                self._playerPos = ((self._playerPos[0]+1), self._playerPos[1])
+        elif self._move == "right":
+            new = (self._playerPos[0] + 1, self._playerPos[1])
+            if self.isEntityPosCorrect(new):
+                self._playerPos = new
 
-        self.path()
+        #self.path()
 
-        for pot in self._potions:
-            if pot == self._playerPos:
-                pass # eat pot
+        potsToDelete = []
+        for i in range(0, len(self._potions)):
+            if self._potions[i] == [self._playerPos[0], self._playerPos[1]]:
+                self._health += 1
+                potsToDelete.append(i)
+
+        if len(potsToDelete) != 0:
+            for j in reversed(range(0, len(potsToDelete))):
+                del self._potions[potsToDelete[j]]
+
+        monsToDelete = []
+        for i in range(0, len(self._monsters)):
+            if self._monsters[i] == [self._playerPos[0], self._playerPos[1]]:
+                self._health -= 1
+                monsToDelete.append(i)
+
+        if len(monsToDelete) != 0:
+            for j in reversed(range(0, len(monsToDelete))):
+                del self._monsters[monsToDelete[j]]
 
         if self._playerPos == self._pgoal:
             self._state = 1
@@ -466,6 +458,7 @@ class Game:
         green = (0, 255, 0)
         blue = (0, 0, 255)
         yellow = (255,255,0)
+        pink = (255, 0, 255)
         for i in range(0, self._ROOM_SIZE+2):
             for j in range(0, self._ROOM_SIZE+2):
                 if i%(self._ROOM_SIZE+1) ==0 or j%(self._ROOM_SIZE+1)==0: #if wall
@@ -478,28 +471,29 @@ class Game:
                 else:
                     pygame.draw.rect(self._screen, white, [i*self._size[0]/(self._ROOM_SIZE+2)+1, j*self._size[1]/(self._ROOM_SIZE+2)+1, 18, 18])
 
-        #for k in range(0, self._ROOM_SIZE+2):
-        #                    pygame.draw.rect(screen, green, [k*size[0]/self._ROOM_SIZE+1, 0, 18, 18])
+        playerLocal = self.convertToLocal(self._playerPos)
+        pygame.draw.circle(self._screen, blue, [(playerLocal[0]*self._size[0]/(self._ROOM_SIZE+2)+(self._size[0]/(self._ROOM_SIZE+2)/2)), (playerLocal[1]*self._size[1]/(self._ROOM_SIZE+2))+(self._size[1]/(self._ROOM_SIZE+2)/2)], 4)
 
-        #for k in range(0, self._ROOM_SIZE+2):
-        #                    pygame.draw.rect(screen, green, [k*size[0]/self._ROOM_SIZE+1, (size[1]-size[1]/(self._ROOM_SIZE+2)-1), 18, 18])
-
-        #for k in range(0, self._ROOM_SIZE+2):
-        #                    pygame.draw.rect(screen, green, [0, k*size[0]/self._ROOM_SIZE+1, 18, 18])
-
-        #for k in range(0, self._ROOM_SIZE+2):
-        #                    pygame.draw.rect(screen, green, [(size[0]-size[0]/(self._ROOM_SIZE+2)-1), k*size[1]/self._ROOM_SIZE+1, 18, 18])
-
-
-        player = self.convertToLocal(self._playerPos)
-        pygame.draw.circle(self._screen, blue, [(player[0]*self._size[0]/(self._ROOM_SIZE+2)+(self._size[0]/(self._ROOM_SIZE+2)/2)), (player[1]*self._size[1]/(self._ROOM_SIZE+2))+(self._size[1]/(self._ROOM_SIZE+2)/2)], 4)
-
-       # for monster in self.filter(self._monsters, (player[2]*(self._ROOM_SIZE+1), player[3]*(self._ROOM_SIZE+1)), ((player[2]*(self._ROOM_SIZE+1)+self._ROOM_SIZE), (player[3]*(self._ROOM_SIZE+1)+self._ROOM_SIZE))):
         for mon in self._monsters:
-            if self.isRoom(mon, self._playerPos):
-                monsterLocal = self.convertToLocal(mon)
-                pygame.draw.circle(self._screen, red, [(monsterLocal[0]*self._size[0]/(self._ROOM_SIZE+2)+(self._size[0]/(self._ROOM_SIZE+2)/2)), (monsterLocal[1]*self._size[1]/(self._ROOM_SIZE+2))+(self._size[1]/(self._ROOM_SIZE+2))/2], 4)
+            monLocal = self.convertToLocal(mon)
+            if monLocal[2] == playerLocal[2] and monLocal[3] == playerLocal[3]:
+                pygame.draw.circle(self._screen, red, [(monLocal[0]*self._size[0]/(self._ROOM_SIZE+2)+(self._size[0]/(self._ROOM_SIZE+2)/2)), (monLocal[1]*self._size[1]/(self._ROOM_SIZE+2))+(self._size[1]/(self._ROOM_SIZE+2))/2], 4)
 
+        for pot in self._potions:
+            potLocal = self.convertToLocal(pot)
+            if potLocal[2] == playerLocal[2] and potLocal[3] == playerLocal[3]:
+                pygame.draw.circle(self._screen, green, [(potLocal[0]*self._size[0]/(self._ROOM_SIZE+2)+(self._size[0]/(self._ROOM_SIZE+2)/2)), (potLocal[1]*self._size[1]/(self._ROOM_SIZE+2))+(self._size[1]/(self._ROOM_SIZE+2))/2], 4)
+
+        agoalLocal = self.convertToLocal(self._agoal)
+        if agoalLocal[2] == playerLocal[2] and agoalLocal[3] == playerLocal[3]:
+            pygame.draw.circle(self._screen, yellow, [(agoalLocal[0]*self._size[0]/(self._ROOM_SIZE+2)+(self._size[0]/(self._ROOM_SIZE+2)/2)), (agoalLocal[1]*self._size[1]/(self._ROOM_SIZE+2))+(self._size[1]/(self._ROOM_SIZE+2))/2], 4)
+
+        pgoalLocal = self.convertToLocal(self._pgoal)
+        if pgoalLocal[2] == playerLocal[2] and pgoalLocal[3] == playerLocal[3]:
+            pygame.draw.circle(self._screen, pink, [(pgoalLocal[0]*self._size[0]/(self._ROOM_SIZE+2)+(self._size[0]/(self._ROOM_SIZE+2)/2)), (pgoalLocal[1]*self._size[1]/(self._ROOM_SIZE+2))+(self._size[1]/(self._ROOM_SIZE+2))/2], 4)
+
+        health_label = self._font.render(str(self._health), 1, (255, 0, 0))
+        self._screen.blit(health_label, (5, 5))
         pygame.display.update()
 
     # Runs every actual frame (e.g. 1MIL times/sec)

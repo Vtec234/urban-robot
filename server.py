@@ -92,7 +92,7 @@ def handler():
     </style>
     </head>
     <body>
-    <canvas id="map" width="800" height="800"></canvas>
+    <canvas id="map" width="1200" height="1000"></canvas>
     <input id="monsterBox" type="checkbox">
     <script>
     window.onload = function() {
