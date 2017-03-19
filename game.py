@@ -153,7 +153,7 @@ class Game:
         for monster in self.filter(self._monsters, (player[2]*self._ROOM_SIZE, player[3]*self._ROOM_SIZE), (player[2]*self._ROOM_SIZE+self._ROOM_SIZE-1, player[3]*self._ROOM_SIZE+self._ROOM_SIZE-1)):
             monsterLocal = self.convertToLocal(monster)
             pygame.draw.circle(screen, red, [(monsterLocal[0]*size[0]/self._ROOM_SIZE)+(size[0]/self._ROOM_SIZE/2), (monsterLocal[1]*size[1]/self._ROOM_SIZE)+(size[1]/self._ROOM_SIZE/2)], 4)
-        
+
         pygame.display.update()
 
     # Runs every actual frame (e.g. 1MIL times/sec)
@@ -174,7 +174,8 @@ class Game:
                 return False
 
         # This is true every second
-        if (int(time.time() * 1000.0)) % self._TICK_MS == 0:
+        #if (int(time.time() * 1000.0)) % self._TICK_MS == 0:
+        if True:
             self.tick()
             self.draw()
 
@@ -183,7 +184,6 @@ class Game:
 def main():
     pygame.init()
     game = Game()
-    #game.draw()
     while game.update():
         pass
 
